@@ -1,8 +1,8 @@
 CC		:= g++
 C_FLAGS := -std=c++11 -Wall -Wextra -O3 -g
 
-BIN		:= ./
-SRC		:= ./
+BIN		:= ./bin
+SRC		:= ./src
 
 LIBRARIES	:=
 

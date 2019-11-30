@@ -2,6 +2,7 @@
 #define LIVE_ANALYSIS_HPP
 
 #include "../code_list/code_list.hpp"
+#include <algorithm>
 #include <vector>
 
 class AnalysisNode

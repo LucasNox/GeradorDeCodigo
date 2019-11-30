@@ -1,37 +1,21 @@
 #include "live_analysis.hpp"
 
-using namespace MipsCode;
-
 /*
     TODO:
         - Definir: Separa código em blocos e roda algoritmo para blocos? Ou trata como monólito?
-
-    NOTES:
-        - Tipos de instrução relevantes: Definição e uso
-            - Definição (sempre define apenas 1): 
-                ADD(1º), ADDI(1º), ADDU(1º), ADDIU(1º), 
-                SUB(1º), SUBU(1º), 
-                MUL(1º), 
-                AND(1º), OR(1º), ANDI(1º), ORI(1º), SLL(1º), SRL(1º)
-                LW(1º), SW(memória --> 1º), LUI(1º) ?
-                MFHI(1º), MFLO(1º)
-                SLT(1º), SLTI(1º)
-
-            - Uso:
-                ADD(2 --> 2, 3), ADDI(1 -> 2), ADDU(2 -> 2, 3), ADDIU(1 -> 2),
-                SUB(2 --> 2, 3), SUBU(2 -> 2, 3),
-                MUL(2 --> 2, 3),
-                AND(2 --> 2, 3), OR(2 -> 2, 3), ANDI(1 -> 2), ORI(1 -> 2), SLL(1 -> 2), SRL(1 -> 2)
-                LW, SW, LUI ?
-                MFHI, MFLO --> hi e lo especificamente, contam?
-                BEQ(2 --> 1, 2), BNE(2 --> 1, 2)
-                SLT(2 --> 2, 3), SLTI(1 --> 2)
-                JR(1 --> 1)
-
-        - Instruções Especiais:
-            - Pulos:
-                BEQ, BNE, J, JR, JAL
+            - Ideia: Tratar como monólito e seguir instruções de jump para fluxo.
 */
+
+using namespace MipsCode;
+
+// INSTRUCTION CATEGORIES
+std::vector<std::string> type0 = {"lui", "mfhi", "mflo"};
+std::vector<std::string> type1 = {"addi", "addiu", "andi", "ori", "sll", "slr", "lw", "sw", "slti"};
+std::vector<std::string> type2 = {"add", "sub", "addu", "subu", "mul", "and", "or", "slt"};
+std::vector<std::string> type3 = {"j", "jal"};
+std::vector<std::string> type4 = {"jr"};
+std::vector<std::string> type5 = {"beq", "bne"};
+
 
 /*
 ! AnalysisNode(CodeNode): Construtor que inicializa nó com CodeNode.
@@ -49,7 +33,10 @@ void runLivenessAnalysis(std::list<CodeNode> CODELIST)
     // Percorre a lista de nós de código
     // A cada nó executa checkInstructionVariables
     // Verifica variáveis definidas e usadas por instrução
-    // Modifica liveness --> TODO: registro para resultados de liveness linha a linha/bloco a bloco?
+
+    // Declaração de vetores de liveness
+    std::vector<std::string> defined;
+    std::vector<std::string> used;
 
     // Lista com ponto a ponto da liveness analysis
     std::list<AnalysisNode*> liveness_list; 
@@ -58,6 +45,32 @@ void runLivenessAnalysis(std::list<CodeNode> CODELIST)
     {
         // Cria novo nó na lista de liveness analysis
         AnalysisNode* node = new AnalysisNode(*i);
+
+
+        // Obtém conjuntos de definição e uso
+        switch(checkInstructionType(*i))
+        {
+            case 0: 
+                    defined = getInstructionDef(*i);
+                    break;
+            case 1: 
+                    defined = getInstructionDef(*i);
+                    used    = getInstructionUse(*i, 1);
+                    break;
+            case 2: 
+                    defined = getInstructionDef(*i);
+                    used    = getInstructionUse(*i, 2);
+                    break;
+            case 3: 
+                    break;
+            case 4:
+                    used    = getInstructionUse(*i, 4);
+                    break;
+            case 5:
+                    used    = getInstructionUse(*i, 5);
+                    break;
+        }
+
 
         // Verifica casos especiais
         if(i == CODELIST.end) // Última linha de código
@@ -82,25 +95,61 @@ void runLivenessAnalysis(std::list<CodeNode> CODELIST)
 }
 
 /*
-! checkInstructionVariables(): Verifica se existem variáveis na instrução.
+! checkInstructionType(): Verifica distribuição de variáveis na instrução.
+    => Tipos:
+            TIPO 0 -> DEF
+            TIPO 1 -> DEF, USO
+            TIPO 2 -> DEF, USO, USO
+            TIPO 3 -> JUMPS SEM USO
+            TIPO 4 -> JUMPS COM USO
+            TIPO 5 -> JUMPS COM USO, USO
 */
-void checkInstructionVariables()
+int checkInstructionType(MipsCode::CodeNode code)
 {
+    if(std::find(type0.begin, type0.end, code.instruction)) { return 0; }
+    else if(std::find(type1.begin, type1.end, code.instruction)) { return 1; }
+    else if(std::find(type2.begin, type2.end, code.instruction)) { return 2; }
+    else if(std::find(type3.begin, type3.end, code.instruction)) { return 3; }
+    else if(std::find(type4.begin, type4.end, code.instruction)) { return 4; }
+    else if(std::find(type5.begin, type5.end, code.instruction)) { return 5; }
 
+    return -1;
 }
 
 /*
 ! getInstructionDef(): Obtem variáveis que a instrução define.
 */
-void getInstructionDef()
+std::vector<std::string> getInstructionDef(MipsCode::CodeNode node)
 {
-
+    std::vector<std::string> defined;
+    defined.insert(defined.begin, node.param1);
+    return defined;
 }
 
 /*
 ! getInstructionUse(): Obtem variáveis que a instrução usa.
 */
-void getInstructionUse()
+std::vector<std::string> getInstructionUse(MipsCode::CodeNode node, int type)
 {
+    std::vector<std::string> used;
 
+    switch (type)
+    {
+        case 1:
+                used.insert(used.begin, node.param2);
+                break;
+        case 2:
+                used.insert(used.begin, node.param2);
+                used.insert(used.begin, node.param3);
+                break;
+        case 4:
+                used.insert(used.begin, node.param1);
+                break;
+        case 5:
+                used.insert(used.begin, node.param1);
+                used.insert(used.begin, node.param2);
+                break;
+    }
+
+    return used;
 }

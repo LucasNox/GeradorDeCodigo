@@ -12,18 +12,21 @@ namespace MipsCode
 
 class MipsCode::CodeNode
 {
-	std::string instruction;
-	std::string param1;
-	std::string param2;
-	std::string param3;
+	public:
+		std::string instruction;
+		std::string param1;
+		std::string param2;
+		std::string param3;
 
-	CodeNode(std::string, std::string = "", std::string = "", std::string = "");
-	std::string toString();
+		CodeNode();
+		CodeNode(std::string, std::string = "", std::string = "", std::string = "");
+		std::string toString();
 };
 
 class MipsCode::CodeList
 {
-	std::list<CodeNode> code_list;
+	public:
+		std::list<CodeNode> code_list;
 };
 
 #endif // __CODE_LIST_HPP__

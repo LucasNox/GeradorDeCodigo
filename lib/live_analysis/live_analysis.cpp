@@ -17,6 +17,21 @@ std::vector<std::string> type4 = {"jr"};
 std::vector<std::string> type5 = {"beq", "bne"};
 
 
+
+/*
+! removeVariable(): Remove variável de vetor.
+*/
+void removeVariable(std::vector<std::string> v, std::string s)
+{
+    auto i = std::find(v.begin, v.end, s);
+
+    if(i != v.end)
+    {
+        std::swap(*i, v.back);
+        v.pop_back();
+    }
+}
+
 /*
 ! AnalysisNode(CodeNode): Construtor que inicializa nó com CodeNode.
 */
@@ -45,7 +60,6 @@ void runLivenessAnalysis(std::list<CodeNode> CODELIST)
     {
         // Cria novo nó na lista de liveness analysis
         AnalysisNode* node = new AnalysisNode(*i);
-
 
         // Obtém conjuntos de definição e uso
         switch(checkInstructionType(*i))
@@ -77,19 +91,33 @@ void runLivenessAnalysis(std::list<CodeNode> CODELIST)
         {
             // node->alive_after -> Vazio
             // node->alive_before -> Insere usos
+            node->alive_before.insert(node->alive_before.begin, std::begin(used), std::end(used));
         }
         else if(i == CODELIST.begin) // Primeira linha de código
         {
             // node->alive_after -> Herda do node->alive_before anterior
+            auto previous = std::next(liveness_list.begin());
+            node->alive_after = (*previous)->alive_before;
+
             // node->alive_before -> Vazio
         }
         else // Linhas intermediárias
         {
             // node->alive_after -> Herda do node->alive_before anterior
-            // node->alive_before -> Remove definições, insere usos (em ordem)
+            auto previous = std::next(liveness_list.begin());
+            node->alive_after = (*previous)->alive_before;
+
+            // node->alive_before -> Remove definições, insere usos (respectivamente)
+            for(auto it = defined.begin; it != defined.end; it ++)
+            {
+                removeVariable(node->alive_before, (*it));
+            }
+
+            node->alive_before.insert(node->alive_before.begin, std::begin(used), std::end(used));
+            
         }
         
-        liveness_list.insert(i, node);
+        liveness_list.insert(liveness_list.begin, node);
     }
 
 }

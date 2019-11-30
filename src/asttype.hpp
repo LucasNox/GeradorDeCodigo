@@ -8,9 +8,9 @@ namespace asttp
 {
 class variable;
 class function;
-class command;
+class action;
 class expression;
-namespace command_class
+namespace command
 {
 class IF;
 class DOWHILE;
@@ -20,37 +20,41 @@ class PRINTF;
 class SCANF;
 class EXIT;
 class RETURN;
-} // namespace command_class
+class FUNC_CALL;
+} // namespace command
 
 } // namespace asttp
 
-enum VAR_TYPE
+enum class VAR_TYPE
 {
     INT,
     INT_VECT,
     CHAR,
     CHAR_VECT,
     VOID,
-    VOID_VECT
+    VOID_VECT,
+    NONE
 };
 
-enum COMM_TYPE
+enum class ACT_TYPE
 {
-    DO_WHILE,
-    IF,
-    WHILE,
-    FOR,
-    PRINTF,
-    SCANF,
-    EXIT,
-    RETURN
+    COMM_DO_WHILE,
+    COMM_IF,
+    COMM_WHILE,
+    COMM_FOR,
+    COMM_PRINTF,
+    COMM_SCANF,
+    COMM_EXIT,
+    COMM_RETURN,
+    EXPRESSION,
+    FUNCTION_CALL,
+    VAR_ACCESS,
+    CONSTANT_USE,
+    NONE
 };
 
-enum EXP_TYPE
+enum class EXP_TYPE
 {
-    NONE,
-    VARIABLE,
-    CONSTANT,
     BINARY_PLUS,
     BINARY_MINUS,
     BINARY_MULTIPLY,
@@ -79,7 +83,8 @@ enum EXP_TYPE
     UNARY_DEC,
     UNARY_BITWISE_NOT,
     UNARY_NOT,
-    UNARY_BITWISE_AND
+    UNARY_BITWISE_AND,
+    NONE
 };
 
 class asttp::variable
@@ -99,48 +104,49 @@ class asttp::function
 {
 public:
     std::string name;
-    int return_type;
+    VAR_TYPE return_type;
     std::map<std::string, asttp::variable> paramter_variables;
     std::map<std::string, asttp::variable> variables_list;
-    std::vector<asttp::command> command_list;
+    std::vector<asttp::action *> command_list;
 
-    function(std::string new_name, int new_return_type)
+    function(std::string new_name, VAR_TYPE new_return_type)
         : name(new_name),
           return_type(new_return_type) {}
     // ~function();
     bool addParamter(asttp::variable);
     bool addVariable(asttp::variable);
-    bool addCommand(asttp::variable);
+    bool addCommand(asttp::action *);
     // bool deleteCommand(int pos); //? talvez seja necessário
 };
 
-class asttp::command
+class asttp::action
 {
 public:
-    void *command_ptr;
-    COMM_TYPE command_type;
-    command(std::string comm_str);
-    // ~command(); // vai drestuir o comando devidamente quando o destrutor for chamado
+    // tipo da ação
+    ACT_TYPE action_type;
+    // ponteiro para estrutura: expressaõ, commando, acesso à variável, etc...
+    void *class_ptr;
+    action(std::string raw_line);
+    void print();
+    ~action();
+};
+
+class asttp::command::DOWHILE
+{
+public:
+    std::vector<action *> actions;
+    asttp::action *condition;
+    DOWHILE(std::string dowhile_str);
+    void print();
+    ~DOWHILE();
 };
 
 class asttp::expression
 {
-public:
-    EXP_TYPE type;
-    expression *right_exp;
-    expression *left_exp;
-    std::string var_name;
+    asttp::action* right_act;
+    asttp::action* left_act;
     expression(std::string exp_str);
+    void print();
     ~expression();
 };
-
-class asttp::command_class::DOWHILE
-{
-public:
-    std::vector<command *> commands;
-    asttp::expression *condition;
-    DOWHILE(std::string dowhile_str);
-    ~DOWHILE();
-};
-
 #endif // __AST_TYPE_HPP__

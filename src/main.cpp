@@ -7,7 +7,8 @@ int main()
 	// obetendo linhas da entrada !
 	std::string arg_input;
 	while (std::getline(std::cin, arg_input))
-		raw_lines.push_back(arg_input);
+        raw_lines.push_back(arg_input);
+    raw_lines.erase(raw_lines.begin()); // removendo o "AST -->"
     // raw_lines.reverse();
     // for (auto &&i : raw_lines)
     //     std::cout << i << std::endl;

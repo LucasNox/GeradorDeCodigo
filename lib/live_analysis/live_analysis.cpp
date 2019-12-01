@@ -1,22 +1,14 @@
 #include "live_analysis.hpp"
 
-/*
-    TODO:
-        - Definir: Separa código em blocos e roda algoritmo para blocos? Ou trata como monólito?
-            - Ideia: Tratar como monólito e seguir instruções de jump para fluxo.
-*/
-
 using namespace MipsCode;
 
-// INSTRUCTION CATEGORIES
-std::vector<std::string> type0 = {"lui", "mfhi", "mflo"};
-std::vector<std::string> type1 = {"addi", "addiu", "andi", "ori", "sll", "slr", "lw", "sw", "slti"};
-std::vector<std::string> type2 = {"add", "sub", "addu", "subu", "mul", "and", "or", "slt"};
-std::vector<std::string> type3 = {"j", "jal"};
-std::vector<std::string> type4 = {"jr"};
-std::vector<std::string> type5 = {"beq", "bne"};
-
-
+/*
+! AnalysisNode(CodeNode): Construtor que inicializa nó com CodeNode.
+*/
+AnalysisNode::AnalysisNode(MipsCode::CodeNode node)
+{
+    this->node = node;
+}
 
 /*
 ! removeVariable(): Remove variável de vetor.
@@ -33,18 +25,14 @@ void removeVariable(std::vector<std::string> v, std::string s)
 }
 
 /*
-! AnalysisNode(CodeNode): Construtor que inicializa nó com CodeNode.
-*/
-AnalysisNode::AnalysisNode(MipsCode::CodeNode node)
-{
-    this->node = node;
-}
-
-/*
 ! runLivenessAnalysis(): Executa função principal da análise.
 */
 void runLivenessAnalysis(std::list<CodeNode> CODELIST)
 {
+    // Divide código em árvore com blocos
+    Diagram diagram;
+    diagram.setBlocks();
+
     // Percorre a lista de nós de código
     // A cada nó executa checkInstructionVariables
     // Verifica variáveis definidas e usadas por instrução
@@ -84,7 +72,6 @@ void runLivenessAnalysis(std::list<CodeNode> CODELIST)
                     used    = getInstructionUse(*i, 5);
                     break;
         }
-
 
         // Verifica casos especiais
         if(i == CODELIST.end) // Última linha de código

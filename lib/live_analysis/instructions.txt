@@ -44,5 +44,5 @@ JR -> vai para endereço guardado na variável -> p1 (uso)
 ___________________________________________
 TIPO 5 -> JUMPS COM USO, USO
 -------------------------------------------
-BEQ -> p1 (uso), p2 (uso)
-BNE -> p1 (uso), p2 (uso)
+BEQ -> p1 (uso), p2 (uso), rótulo
+BNE -> p1 (uso), p2 (uso), rótulo

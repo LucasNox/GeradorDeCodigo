@@ -15,7 +15,7 @@ void Diagram::initializeDiagram(std::list<MipsCode::CodeNode> CODELIST)
 {
     this->codelist = CODELIST;
     this->blocklist = setBlocks(this->codelist, getLeaders(this->codelist));
-    linkBlocks(this->blocklist);
+    linkBlocks(this->blocklist, this->codelist);
 }
 
 
@@ -35,6 +35,20 @@ MipsCode::CodeNode* searchTargetLabel(std::list<MipsCode::CodeNode> CODELIST, st
 {
     return(std::find_if(CODELIST.begin, CODELIST.end, [] (const MipsCode::CodeNode& node, std::string label) 
     { return node.instruction == label; }));
+}
+
+/*
+! searchTargetBlock(): Busca bloco que começa com a label especificada.
+*/
+Block searchTargetBlock(std::list<Block> BLOCKLIST, std::string label)
+{
+    for(auto i = BLOCKLIST.begin; i != BLOCKLIST.end; i++)
+    {
+        if((*i).start == label)
+        {
+            return (*i);
+        }
+    }
 }
 
 /*
@@ -75,27 +89,17 @@ std::vector<MipsCode::CodeNode*> getLeaders(std::list<MipsCode::CodeNode> CODELI
         // Tipo 3 => Sem var, vai para rótulo
         if(std::find(type3.begin, type3.end, (*i).instruction))
         {
-            if((*i).instruction == "jal")
-            {
-                // Salva posição atual
+            // Marca rótulo alvo como líder
+            leaders.insert(leaders.end, searchTargetLabel(CODELIST, (*i).param1));
 
-                // Encontra alvo
-            }
-            else
-            {
-                // Marca rótulo alvo como líder
-                leaders.insert(leaders.end, searchTargetLabel(CODELIST, (*i).param1));
-
-                // Marca linha seguinte como líder
-                leaders.insert(leaders.end, std::next(i));
-            }
-
+            // Marca linha seguinte como líder
+            leaders.insert(leaders.end, std::next(i));
         }
         // Tipo 4 => Uma var, vai para endereço da variável
         else if(std::find(type4.begin, type4.end, (*i).instruction))
         {
-            // Marca endererço alvo como líder
-
+            // Marca linha seguinte como líder
+            leaders.insert(leaders.end, std::next(i));
         }
         // Tipo 5 => Duas vars, vai para rótulo
         else if(std::find(type5.begin, type5.end, (*i).instruction))
@@ -126,11 +130,14 @@ std::list<Block> setBlocks(std::list<MipsCode::CodeNode> CODELIST, std::vector<M
             if(start == nullptr){ start = i; }
             else 
             { 
-                BLOCKLIST.insert(BLOCKLIST.end, Block(start, i));
-                start = nullptr;
+                BLOCKLIST.insert(BLOCKLIST.end, Block(start, i-1));
+                start = i;
             }
         }
     }
+
+    if(start != nullptr)
+    { BLOCKLIST.insert(BLOCKLIST.end, Block(start, CODELIST.end)); }
 
     return BLOCKLIST;
 }
@@ -138,13 +145,37 @@ std::list<Block> setBlocks(std::list<MipsCode::CodeNode> CODELIST, std::vector<M
 /*
 ! linkBlocks(): Conecta blocos criados de acordo com fluxo de instruções.
 */
-void linkBlocks(std::list<Block> BLOCKLIST)
+void linkBlocks(std::list<Block> BLOCKLIST, std::list<MipsCode::CodeNode> CODELIST)
 {
     Diagram diagram;
 
+    // Percorre blocos da lista de blocos
     for(auto i = BLOCKLIST.begin; i != BLOCKLIST.end; i++)
     {
-        // Pegar instrução de fim de bloco
+        Block block = (*i);
 
+        // JAL
+        if(block.end->instruction == "jal") 
+        {  
+            Block jr = searchTargetBlock(BLOCKLIST, (*searchReturnInstruction(CODELIST, block.end)).instruction);
+            block.children.insert(block.children.end, jr);
+        }
+        // J
+        else if(block.end->instruction == "j")
+        {
+            Block target = searchTargetBlock(BLOCKLIST, block.end->param1);
+            block.children.insert(block.children.end, target);
+        }
+        // BEQ, BNE
+        else if(std::find(type5.begin, type5.end, block.end->instruction)) 
+        {  
+            // If jumps
+            Block target = searchTargetBlock(BLOCKLIST, block.end->param3);
+            block.children.insert(block.children.end, target);
+
+            // If not jumps
+            
+        }
+        
     }
 }

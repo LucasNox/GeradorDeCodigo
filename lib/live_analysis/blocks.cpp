@@ -9,11 +9,23 @@ std::vector<std::string> type4 = {"jr"};
 std::vector<std::string> type5 = {"beq", "bne"};
 
 /*
+! initializeDiagram(): Inicializa blocos do diagrama.
+*/
+void Diagram::initializeDiagram(std::list<MipsCode::CodeNode> CODELIST)
+{
+    this->codelist = CODELIST;
+    this->blocklist = setBlocks(this->codelist, getLeaders(this->codelist));
+    linkBlocks(this->blocklist);
+}
+
+
+/*
 ! Block(CodeNode): Construtor que inicializa bloco com nó de linha de código.
 */
-Block::Block(MipsCode::CodeNode node)
+Block::Block(MipsCode::CodeNode* start, MipsCode::CodeNode* end)
 {
-    this->node = node;
+    this->start = start;
+    this->end = end;
 }
 
 /*
@@ -26,14 +38,34 @@ MipsCode::CodeNode* searchTargetLabel(std::list<MipsCode::CodeNode> CODELIST, st
 }
 
 /*
+! searchReturnInstruction(): Busca retorno de uma instrução jump-and-link.
+*/
+MipsCode::CodeNode* searchReturnInstruction(std::list<MipsCode::CodeNode> CODELIST, MipsCode::CodeNode* jal)
+{
+    auto target = searchTargetLabel(CODELIST, jal->param1);
+
+    for(auto i = target; i != CODELIST.end; i++)
+    {
+        if((*i).instruction == "jr")
+        {
+            return i;
+        }
+    }
+
+    return nullptr;
+}
+
+/*
 !  getLeaders(): Obtém linhas líderes do código.
-    TODO: Função jr;
 */
 std::vector<MipsCode::CodeNode*> getLeaders(std::list<MipsCode::CodeNode> CODELIST)
 {
     // Inicializa vetor de líderes
     std::vector<MipsCode::CodeNode*> leaders;
     leaders.insert(leaders.begin, CODELIST.begin);
+
+    // Variável para valor do jal
+    MipsCode::CodeNode jumped;
 
     // Define líderes
     for(auto i = CODELIST.begin+1; i != CODELIST.end; i++)
@@ -43,11 +75,21 @@ std::vector<MipsCode::CodeNode*> getLeaders(std::list<MipsCode::CodeNode> CODELI
         // Tipo 3 => Sem var, vai para rótulo
         if(std::find(type3.begin, type3.end, (*i).instruction))
         {
-            // Marca rótulo alvo como líder
-            leaders.insert(leaders.end, searchTargetLabel(CODELIST, (*i).param1));
+            if((*i).instruction == "jal")
+            {
+                // Salva posição atual
 
-            // Marca linha seguinte como líder
-            leaders.insert(leaders.end, std::next(i));
+                // Encontra alvo
+            }
+            else
+            {
+                // Marca rótulo alvo como líder
+                leaders.insert(leaders.end, searchTargetLabel(CODELIST, (*i).param1));
+
+                // Marca linha seguinte como líder
+                leaders.insert(leaders.end, std::next(i));
+            }
+
         }
         // Tipo 4 => Uma var, vai para endereço da variável
         else if(std::find(type4.begin, type4.end, (*i).instruction))
@@ -72,7 +114,37 @@ std::vector<MipsCode::CodeNode*> getLeaders(std::list<MipsCode::CodeNode> CODELI
 /*
 ! setBlocks(): Utiliza linhas líderes para dividr código em blocos.
 */
-void setBlocks(std::list<MipsCode::CodeNode> CODELIST, std::vector<MipsCode::CodeNode*> leaders)
+std::list<Block> setBlocks(std::list<MipsCode::CodeNode> CODELIST, std::vector<MipsCode::CodeNode*> leaders)
 {
+    std::list<Block> BLOCKLIST;
+    MipsCode::CodeNode* start = nullptr;
 
+    for(auto i = CODELIST.begin; i != CODELIST.end; i++)
+    {
+        if(std::find(leaders.begin, leaders.end, i))
+        {
+            if(start == nullptr){ start = i; }
+            else 
+            { 
+                BLOCKLIST.insert(BLOCKLIST.end, Block(start, i));
+                start = nullptr;
+            }
+        }
+    }
+
+    return BLOCKLIST;
+}
+
+/*
+! linkBlocks(): Conecta blocos criados de acordo com fluxo de instruções.
+*/
+void linkBlocks(std::list<Block> BLOCKLIST)
+{
+    Diagram diagram;
+
+    for(auto i = BLOCKLIST.begin; i != BLOCKLIST.end; i++)
+    {
+        // Pegar instrução de fim de bloco
+
+    }
 }

@@ -31,7 +31,7 @@ void runLivenessAnalysis(std::list<CodeNode> CODELIST)
 {
     // Divide código em árvore com blocos
     Diagram diagram;
-    diagram.setBlocks();
+    diagram.initializeDiagram(CODELIST);
 
     // Percorre a lista de nós de código
     // A cada nó executa checkInstructionVariables

@@ -13,7 +13,6 @@ class AnalysisNode
         std::vector<std::string> alive_after;
 
         MipsCode::CodeNode node;
-        std::vector<MipsCode::CodeNode> children;
 
         AnalysisNode();
         AnalysisNode(MipsCode::CodeNode);

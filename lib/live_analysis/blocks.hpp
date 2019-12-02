@@ -17,19 +17,25 @@ const std::vector<std::string> type5 = {"beq", "bne"};
 class Diagram
 {
     public:
+        std::list<MipsCode::CodeNode> codelist;
+        std::list<Block> blocklist;
+        
         MipsCode::CodeNode root;
 
         Diagram();
-        void setBlocks();
+        void initializeDiagram(std::list<MipsCode::CodeNode> CODELIST);
 };
 
 class Block
 {
     public:
-        MipsCode::CodeNode node;
+        MipsCode::CodeNode* start;
+        MipsCode::CodeNode* end;
+
+        std::vector<Block> children;
 
         Block();
-        Block(MipsCode::CodeNode);
+        Block(MipsCode::CodeNode*, MipsCode::CodeNode*);
 };
 
 #endif // !BLOCKS_HPP

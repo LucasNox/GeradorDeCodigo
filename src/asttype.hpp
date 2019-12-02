@@ -143,8 +143,11 @@ public:
 
 class asttp::expression
 {
+    public:
+
     asttp::action* right_act;
     asttp::action* left_act;
+    EXP_TYPE exp_type;
     expression(std::string exp_str);
     void print();
     ~expression();

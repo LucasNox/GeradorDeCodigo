@@ -1,0 +1,78 @@
++  PLUS
+	add $t1, $t2, $t3
+
+-  MINUS
+	sub $t1, $t2, $t3
+
+*  MULTIPLY
+	mul $t1, $t2, $t3
+
+/  DIV
+	div $t1, $t2, $t3
+
+%  REMAINDER
+	div $t1, $t2
+	mthi $t3
+
+&  BITWISE_AND
+	and $t1, $t2, $t3
+
+|  BITWISE_OR
+	or $t1, $t2, $t3
+
+^  BITWISE_XOR
+	xor $t1, $t2, $t3
+
+&& LOGICAL_AND
+	NÃO SEI
+
+|| LOGICAL_OR
+	NÃO SEI
+
+== EQUAL
+	add $t1, $zero, $zero
+	bne $t2, $t3, EQUAL_LABEL_N#
+		addi $t1, $zero, 1
+	EQUAL_LABEL_N#:
+
+!= NOT_EQUAL
+	add $t1, $zero, $zero
+	beq $t2, $t3, NEQUAL_LABEL_N#
+		addi $t1, $zero, 1
+	NEQUAL_LABEL_N#:
+
+<  LESS_THAN
+	slt $t1, $t2, $t3
+
+>  GREATER_THAN
+	slt $t1, $t3, $t2
+
+<= LESS_EQUAL
+	slt $t1, $t2, $t3
+	bne $t1, $zero, LESS_EQUAL_LABEL_N#
+	bne $t2, $t3, LESS_EQUAL_LABEL_N#
+		addi $t1, $zero, 1
+	LESS_EQUAL_LABEL_N#:
+
+>= GREATER_EQUAL
+	slt $t1, $t3, $t2
+	bne $t1, $zero, GREATER_EQUAL_LABEL_N#
+	bne $t2, $t3, GREATER_EQUAL_LABEL_N#
+		addi $t1, $zero, 1
+	GREATER_EQUAL_LABEL_N#:
+
+>> R_SHIFT
+	srlv $t1, $t2, $t3
+
+<< L_SHIFT
+	sllv $t1, $t2, $t3
+
+=  ASSIGN
+	add $t1, $t2, $zero
+
++= ADD_ASSIGN
+	add $t1, $t1, $t2
+
+-= MINUS_ASSIGN
+	sub $t1, $t1, $t2
+

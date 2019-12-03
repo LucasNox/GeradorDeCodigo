@@ -1,7 +1,7 @@
 CC		:= g++
 C_FLAGS := -std=c++11 -Wall -Wextra -O3 -g
 
-BIN		:= ./bin
+BIN		:= ./
 SRC		:= ./src
 
 LIBRARIES	:=
@@ -26,7 +26,7 @@ vrun: remake
 .PHONY: remake
 remake:
 	rm -f $(BIN)/$(EXECUTABLE)
-	$(CC) $(C_FLAGS) $(wildcard *.cpp) $(wildcard *.hpp) -o $(EXECUTABLE) $(LIBRARIES)
+	$(CC) $(C_FLAGS) $(wildcard $(SRC)/*.cpp) $(wildcard $(SRC)/*.hpp) -o $(EXECUTABLE) $(LIBRARIES)
 	
 $(BIN)/$(EXECUTABLE):
-	$(CC) $(C_FLAGS) $(wildcard *.cpp) $(wildcard *.hpp) -o $@ $(LIBRARIES)
+	$(CC) $(C_FLAGS) $(wildcard $(SRC)/*.cpp) $(wildcard $(SRC)/*.hpp) -o $@ $(LIBRARIES)

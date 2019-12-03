@@ -31,4 +31,9 @@
 *.out
 *.app
 
+<<<<<<< HEAD
 /.vscode
+=======
+gerador
+/.vscode
+>>>>>>> prog_din

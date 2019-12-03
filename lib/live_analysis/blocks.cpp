@@ -38,9 +38,23 @@ MipsCode::CodeNode* searchTargetLabel(std::list<MipsCode::CodeNode> CODELIST, st
 }
 
 /*
-! searchTargetBlock(): Busca bloco que começa com a label especificada.
+! searchTargetBlockByNode(): Busca bloco que começa com a linha especificada.
 */
-Block searchTargetBlock(std::list<Block> BLOCKLIST, std::string label)
+Block searchTargetBlockByNode(std::list<Block> BLOCKLIST, MipsCode::CodeNode line)
+{
+    for(auto i = BLOCKLIST.begin; i != BLOCKLIST.end; i++)
+    {
+        if((*i).start == line)
+        {
+            return i;
+        }
+    }
+}
+
+/*
+! searchTargetBlockByLabel(): Busca bloco que começa com a label especificada.
+*/
+Block searchTargetBlockByLabel(std::list<Block> BLOCKLIST, std::string label)
 {
     for(auto i = BLOCKLIST.begin; i != BLOCKLIST.end; i++)
     {
@@ -67,6 +81,15 @@ MipsCode::CodeNode* searchReturnInstruction(std::list<MipsCode::CodeNode> CODELI
     }
 
     return nullptr;
+}
+
+/*
+! searchNextInstruction(): Busca instrução seguinte.
+*/
+MipsCode::CodeNode* searchNextInstruction(std::list<MipsCode::CodeNode> CODELIST, MipsCode::CodeNode* line)
+{
+    auto i = std::find(CODELIST.begin, CODELIST.end, line);
+    return i+1;
 }
 
 /*
@@ -157,24 +180,24 @@ void linkBlocks(std::list<Block> BLOCKLIST, std::list<MipsCode::CodeNode> CODELI
         // JAL
         if(block.end->instruction == "jal") 
         {  
-            Block jr = searchTargetBlock(BLOCKLIST, (*searchReturnInstruction(CODELIST, block.end)).instruction);
+            Block jr = searchTargetBlockByLabel(BLOCKLIST, (*searchReturnInstruction(CODELIST, block.end)).instruction);
             block.children.insert(block.children.end, jr);
         }
         // J
         else if(block.end->instruction == "j")
         {
-            Block target = searchTargetBlock(BLOCKLIST, block.end->param1);
+            Block target = searchTargetBlockByLabel(BLOCKLIST, block.end->param1);
             block.children.insert(block.children.end, target);
         }
         // BEQ, BNE
         else if(std::find(type5.begin, type5.end, block.end->instruction)) 
         {  
             // If jumps
-            Block target = searchTargetBlock(BLOCKLIST, block.end->param3);
+            Block target = searchTargetBlockByLabel(BLOCKLIST, block.end->param3);
             block.children.insert(block.children.end, target);
 
             // If not jumps
-            
+            Block target = searchTargetBlockByNode(BLOCKLIST, (*searchNextInstruction(CODELIST, block.end)));
         }
         
     }

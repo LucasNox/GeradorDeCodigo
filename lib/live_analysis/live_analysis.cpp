@@ -29,7 +29,7 @@ void removeVariable(std::vector<std::string> v, std::string s)
 */
 void runLivenessAnalysis(std::list<CodeNode> CODELIST)
 {
-    // Divide código em árvore com blocos
+    // Divide código blocos conectados
     Diagram diagram;
     diagram.initializeDiagram(CODELIST);
 

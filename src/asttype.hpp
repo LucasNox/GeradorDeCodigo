@@ -118,7 +118,6 @@ public:
     bool addCommand(asttp::action *);
     // bool deleteCommand(int pos); //? talvez seja necessário
 };
-
 class asttp::action
 {
 public:
@@ -141,13 +140,76 @@ public:
     ~DOWHILE();
 };
 
+class asttp::command::IF
+{
+public:
+    std::vector<action *> then_actions;
+    std::vector<action *> else_actions;
+    asttp::action *condition;
+    IF(std::string if_str);
+    void print();
+    ~IF();
+};
+class asttp::command::WHILE
+{
+public:
+    std::vector<action *> actions;
+    asttp::action *condition;
+    WHILE(std::string while_str);
+    void print();
+    ~WHILE();
+};
+class asttp::command::FOR
+{
+public:
+    std::vector<action *> actions;
+    asttp::action *initialization;
+    asttp::action *condition;
+    asttp::action *increment;
+    FOR(std::string for_str);
+    void print();
+    ~FOR();
+};
+class asttp::command::PRINTF
+{
+public:
+    std::vector<action *> actions;
+    std::string to_print;
+    PRINTF(std::string printf_str);
+    void print();
+    ~PRINTF();
+};
+class asttp::command::SCANF
+{
+public:
+    asttp::expression pointer;
+    std::string to_read;
+    SCANF(std::string scanf_str);
+    void print();
+    ~SCANF();
+};
+class asttp::command::EXIT
+{
+public:
+    asttp::action action;
+    EXIT(std::string exit_str);
+    void print();
+    ~EXIT();
+};
+class asttp::command::RETURN
+{
+public:
+    asttp::action action;
+    RETURN(std::string return_str);
+    void print();
+    ~RETURN();
+};
+
 class asttp::expression
 {
-    public:
-
-    asttp::action* right_act;
-    asttp::action* left_act;
     EXP_TYPE exp_type;
+    asttp::action *right_act;
+    asttp::action *left_act;
     expression(std::string exp_str);
     void print();
     ~expression();

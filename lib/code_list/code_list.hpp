@@ -1,29 +1,19 @@
 #if !defined(__CODE_LIST_HPP__)
 #define __CODE_LIST_HPP__
-
 #include<list>
 #include<string>
 
-namespace MipsCode
-{
-	class CodeNode;
-	class CodeList;
-}
-
-class MipsCode::CodeNode
+class CodeNode
 {
 	std::string instruction;
-	std::string param1;
-	std::string param2;
-	std::string param3;
+	std::string param_space;
+	std::string param_comma1;
+	std::string param_comma2;
+	std::string param_parentheses_const;
+	std::string param_parentheses;
 
-	CodeNode(std::string, std::string = "", std::string = "", std::string = "");
+	CodeNode(std::string, std::string = "", std::string = "", std::string = "", std::string = "", std::string = "");
 	std::string toString();
-};
-
-class MipsCode::CodeList
-{
-	std::list<CodeNode> code_list;
 };
 
 #endif // __CODE_LIST_HPP__

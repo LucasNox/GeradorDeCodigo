@@ -1,0 +1,48 @@
+__________________________________________
+TIPO 0 -> DEF
+------------------------------------------
+LUI -> p1 (def)
+MFHI -> p1 (def)
+MFLO -> p1 (def)
+
+__________________________________________
+TIPO 1 -> DEF, USO
+------------------------------------------
+ADDI -> p1 (def), p2 (uso)
+ADDIU -> p1 (def), p2 (uso)
+ANDI -> p1 (def), p2 (uso)
+ORI -> p1 (def), p2 (uso)
+SLL -> p1 (def), p2 (uso)
+SRL -> p1 (def), p2 (uso)
+LW -> p1 (def), p2 (uso) <-- CONFIRMAR
+SW -> p1 (def), p2 (uso) <-- CONFIRMAR
+SLTI -> p1 (def), p2 (uso)
+
+___________________________________________
+TIPO 2 -> DEF, USO, USO
+-------------------------------------------
+ADD -> p1 (def), p2 (uso), p3 (uso)
+SUB -> p1 (def), p2 (uso), p3 (uso)
+ADDU -> p1 (def), p2 (uso), p3 (uso)
+SUBU -> p1 (def), p2 (uso), p3 (uso)
+MUL -> p1 (def), p2 (uso), p3 (uso)
+AND -> p1 (def), p2 (uso), p3 (uso)
+OR -> p1 (def), p2 (uso), p3 (uso)
+SLT -> p1 (def), p2 (uso), p3 (uso)
+
+___________________________________________
+TIPO 3 -> JUMPS SEM VAR
+-------------------------------------------
+J -> vai para rótulo 
+JAL -> salva endereço em $ra, vai para rótulo
+
+___________________________________________
+TIPO 4 -> JUMPS COM USO
+-------------------------------------------
+JR -> vai para endereço guardado na variável -> p1 (uso)
+
+___________________________________________
+TIPO 5 -> JUMPS COM USO, USO
+-------------------------------------------
+BEQ -> p1 (uso), p2 (uso), rótulo
+BNE -> p1 (uso), p2 (uso), rótulo

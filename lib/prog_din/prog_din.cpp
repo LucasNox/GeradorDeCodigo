@@ -36,14 +36,18 @@ ProgDin::ProgDin()
 	this->current_id_pattern = 1;
 }
 
+//Função para adicionar um padrão de arvore no objeto da programação dinamica
 int ProgDin::addPattern(std::list<ExpNode*> list, std::string instruction, int cost)
 {
+	//Adiciona uma entrada com o EXPRESSION_TYPE inicial com um ID unico
 	this->operator_id.insert(std::make_pair(list.front()->type, this->current_id_pattern));
+	//Cria um PatternData para o padrão usando o ID
 	PatternData *ptdata = new PatternData();
 	ptdata->ID = current_id_pattern;
 	ptdata->cost = cost;
 	ptdata->instruction = instruction;
 	ptdata->tree_pattern = list;
+	//Insere o PatternData num map com o ID unico
 	this->id_treePattern.insert(std::make_pair(this->current_id_pattern, ptdata));
 	return this->current_id_pattern++;
 }

@@ -42,7 +42,7 @@ static bool add_variable(const char *c_str, std::map<std::string, asttp::variabl
     free(tokens[0]);
     return true;
 }
-static bool add_command(const char *c_str, std::vector<asttp::command *> *global_vars)
+static bool add_command(const char *c_str, std::vector<asttp::action *> *global_vars)
 {
     switch (c_str[0])
     {
@@ -75,6 +75,7 @@ Ast::Ast(std::vector<std::string> raw_lines)
     this->constants = new std::map<std::string, int>;
     this->global_variables = new std::map<std::string, asttp::variable *>;
     this->main_variables = new std::map<std::string, asttp::variable *>;
+    this->action_list = new std::vector<asttp::action *>;
     for (size_t i = 0; i < raw_lines.size(); ++i)
     {
         bool stop_flag = false;
@@ -97,7 +98,7 @@ Ast::Ast(std::vector<std::string> raw_lines)
             stop_flag = !add_variable(raw_lines[i].c_str() + 10, this->main_variables);
             break;
         default:
-            stop_flag = !add_command(raw_lines[i].c_str(), this->commands_list);
+            stop_flag = !add_command(raw_lines[i].c_str(), this->action_list);
             break;
         }
         if (stop_flag)
@@ -123,4 +124,7 @@ Ast::~Ast()
     for (auto &&entry : *this->main_variables)
         delete entry.second;
     delete this->main_variables;
+    for (auto &&entry : *this->action_list)
+        delete entry;
+    delete this->action_list;
 }

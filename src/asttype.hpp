@@ -133,16 +133,19 @@ public:
 class asttp::command::DOWHILE
 {
 public:
+    bool isValid();
+    ACT_TYPE getType();
     std::vector<action *> actions;
     asttp::action *condition;
     DOWHILE(std::string dowhile_str);
     void print();
     ~DOWHILE();
 };
-
 class asttp::command::IF
 {
 public:
+    bool isValid();
+    ACT_TYPE getType();
     std::vector<action *> then_actions;
     std::vector<action *> else_actions;
     asttp::action *condition;
@@ -153,6 +156,8 @@ public:
 class asttp::command::WHILE
 {
 public:
+    bool isValid();
+    ACT_TYPE getType();
     std::vector<action *> actions;
     asttp::action *condition;
     WHILE(std::string while_str);
@@ -162,6 +167,8 @@ public:
 class asttp::command::FOR
 {
 public:
+    bool isValid();
+    ACT_TYPE getType();
     std::vector<action *> actions;
     asttp::action *initialization;
     asttp::action *condition;
@@ -173,6 +180,8 @@ public:
 class asttp::command::PRINTF
 {
 public:
+    bool isValid();
+    ACT_TYPE getType();
     std::vector<action *> actions;
     std::string to_print;
     PRINTF(std::string printf_str);
@@ -182,7 +191,9 @@ public:
 class asttp::command::SCANF
 {
 public:
-    asttp::expression pointer;
+    bool isValid();
+    ACT_TYPE getType();
+    asttp::expression *pointer;
     std::string to_read;
     SCANF(std::string scanf_str);
     void print();
@@ -191,7 +202,9 @@ public:
 class asttp::command::EXIT
 {
 public:
-    asttp::action action;
+    bool isValid();
+    ACT_TYPE getType();
+    asttp::action *action;
     EXIT(std::string exit_str);
     void print();
     ~EXIT();
@@ -199,14 +212,28 @@ public:
 class asttp::command::RETURN
 {
 public:
+    bool isValid();
+    ACT_TYPE getType();
     asttp::action action;
     RETURN(std::string return_str);
     void print();
     ~RETURN();
 };
+class asttp::command::FUNC_CALL
+{
+public:
+    bool isValid();
+    ACT_TYPE getType();
+    std::string name;
+    std::vector<asttp::action *> params;
+    FUNC_CALL(std::string return_str);
+    void print();
+    ~FUNC_CALL();
+};
 
 class asttp::expression
 {
+public:
     EXP_TYPE exp_type;
     asttp::action *right_act;
     asttp::action *left_act;

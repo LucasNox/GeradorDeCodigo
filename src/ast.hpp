@@ -11,7 +11,7 @@ public:
     std::map<std::string, int> *constants;
     std::map<std::string, asttp::function *> *function_list;
     std::map<std::string, asttp::variable *> *main_variables;
-    std::vector<asttp::command *> *commands_list;
+    std::vector<asttp::action *> *action_list;
     Ast(std::vector<std::string> raw_lines);
     ~Ast();
 };

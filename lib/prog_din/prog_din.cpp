@@ -59,12 +59,16 @@ ExpWrapper *ProgDin::runProgDin(asttp::action *exp_root)
 	evaluateCost(exp_rootw, this);
 }
 
+//Função que "embrulha" as expressões com um wrapper a fim de ajudar nas proximas funções
 ExpWrapper *wrapExpression(asttp::action *exp)
 {
+	//Verifica se o nó é null
 	if(exp == nullptr)
 		return nullptr;
+	//Cria o wrapper de expressão
 	ExpWrapper *expw = new ExpWrapper();
 	expw->action = exp;
+	//Analisa o tipo de action para adicionar o tipo correto
 	if(exp->action_type == ACT_TYPE::EXPRESSION)
 	{
 		expw->type = (EXPRESSION_TYPE) static_cast<asttp::expression *>(exp->class_ptr)->exp_type;
@@ -87,52 +91,66 @@ ExpWrapper *wrapExpression(asttp::action *exp)
 	return expw;
 }
 
+//Função onde é criado uma lista de tokens em cada nó que representa a sub-arvore onde o dado nó é raiz
 void tokenizeExpression(ExpWrapper *exp)
 {
 	if(exp == nullptr)
 		return;
+	//Realiza a tokenização
 	searchTokens(exp, exp, 0);
+	//Desce recursivamente para os proximos nós realizando a tokenização
 	tokenizeExpression(exp->l_exp);
 	tokenizeExpression(exp->r_exp);
 }
 
+//Função que realiza a tokenização
 void searchTokens(ExpWrapper *exp_root, ExpWrapper *exp, int depth)
 {
 	if(exp == nullptr)
 		return;
+	//Cria um objeto do token
 	ExpNode *node = new ExpNode();
+	//Adiciona o tipo dele, a profundidade e um ponteiro para o ExpWrapper para auxilio futuro
 	node->type = exp->type;
 	node->depth = depth;
 	node->expw = exp; 
+	//Adiciona no fim da lista
 	exp_root->tokens.push_back(node);
+	//Desce recursivamente tokenizando os proximos nós
 	searchTokens(exp_root, exp->l_exp, depth + 1);
 	searchTokens(exp_root, exp->r_exp, depth + 1);
 	return;
 }
 
+//Função onde é casado um padrão de arvore e dado seu custo
 void evaluateCost(ExpWrapper *exp, ProgDin *pg)
 {
 	if(exp == nullptr)
 		return;
-	
+	//Desce recursivamente para iniciar a avaliação nos nós mais profundos
 	evaluateCost(exp->l_exp, pg);
 	evaluateCost(exp->r_exp, pg);
 
 	// std::pair< std::multimap< EXPRESSION_TYPE, int >::iterator, std::multimap<EXPRESSION_TYPE, int>::iterator > it_pair = pg->operator_id.equal_range(exp->type);
 	// std::multimap<EXPRESSION_TYPE, int>::iterator it = it_pair.first;
+	//Objeto para armazenar o melhor padrão encontrado de todos os padrões avaliados para o nó atual
 	matchResult *best_result;
 	auto it_pair = pg->operator_id.equal_range(exp->type);
 	for(auto it = it_pair.first; it != it_pair.second; it++)
 	{
+		//Chama a função de casamento de padrão que resultará num objeto de resultado
 		matchResult *result = matchingPattern(exp, it->second, pg);
+		//O objeto de resultado é avaliado contra o melhor encontrado anteriormente, e se este for melhor que o anterior, passará a ser o melhor resultado
 		if(result->pattern != 0 && result->total_cost < best_result->total_cost)
 		{
 			best_result = result;
 		}
 	}
+	//Feita a analise de todos os padrões possiveis, o objeto do melhor resultado é armazenado no ExpWrapper do nó atual
+	exp->pattern_matched = best_result;
 }
 
-// Uma classe que armazena um resultado de matchingPattern
+// Uma classe que armazena um resultado de matchingPattern, possuindo o custo total do padrão, a lista de nós anexados e o ID do padrão
 class matchResult
 {
 	public:
@@ -147,6 +165,7 @@ class matchResult
 	}
 };
 
+//Função que testa um casamento de padrão de arvore no nó analisado
 matchResult *matchingPattern(ExpWrapper *exp, int id, ProgDin *pg)
 {
 	//Ultima profundida onde houve um anexo
@@ -160,10 +179,8 @@ matchResult *matchingPattern(ExpWrapper *exp, int id, ProgDin *pg)
 	auto it_map = pg->id_treePattern.find(id);
 	//Pegando unico padrão de arvore correspondente ao ID
 	auto list = it_map->second->tree_pattern;
-	/*
-		Neste for é inicializado o iterador it_listp (iterador da lista do padrão de arvore) e
-		o iterador it_listt (iterador da lista de tokens da expressão). O for roda enquanto nenhum iterador chegar ao fim.
-	*/
+	//Neste for é inicializado o iterador it_listp (iterador da lista do padrão de arvore) e
+	//o iterador it_listt (iterador da lista de tokens da expressão). O for roda enquanto nenhum iterador chegar ao fim.
 	auto it_listp = list.begin(), it_listt = exp->tokens.begin();
 	for(; it_listp != list.end() && it_listt != exp->tokens.end();
 		it_listp++, it_listt++)
@@ -196,7 +213,7 @@ matchResult *matchingPattern(ExpWrapper *exp, int id, ProgDin *pg)
 			//Marca a profundidade desejada de analise como sendo igual à do nó anexado
 			last_depth = nodet->depth;
 		}
-		//Caso não seja um ANYTHING, ele deve ser compativel com o mesmo tipo e mesma profundidade
+		//Caso não seja um ANYTHING, ele deve ser compativel com o mesmo tipo e mesma profundidade, se não for, o padrão não é casado imediatamente
 		else if(nodep->type != nodet->type || nodep->depth != nodet->depth)
 		{
 			result->total_cost = 0;
@@ -218,57 +235,7 @@ matchResult *matchingPattern(ExpWrapper *exp, int id, ProgDin *pg)
 	}
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// void evaluateCost(ExpWrapper *exp, std::multimap< EXP_TYPE, std::list<EXP_TYPE> > tree_patterns)
-// {
-// 	if(exp == nullptr)
-// 		return;
-// 	evaluateCost(exp->l_exp, tree_patterns);
-// 	evaluateCost(exp->r_exp, tree_patterns);
-// 	auto it_pair = tree_patterns.equal_range(exp->tokens.front());
-// 	auto it = it_pair.first;
-// 	for(; it != it_pair.second; it++)
-// 	{
-// 		if(evaluateCostByPattern(exp, it->second))
-// 		{
-// 			//CONTINUAR DAQUI
-
-// 		}
-// 	}
-// }
-
-// bool evaluateCostByPattern(ExpWrapper *exp, std::list<EXP_TYPE> tree_pattern)
-// {
-// 	if(exp == nullptr || tree_pattern.empty())
-// 		return false;
-// 	auto it1 = exp->tokens.begin();
-// 	auto it2 = tree_pattern.begin();
-// 	for(; it1 != exp->tokens.end() && it2 != tree_pattern.end(); it1++, it2++)
-// 	{
-// 		if((*it1) != (*it2))
-// 			return false;
-// 	}	
-// 	return true;
-// }
-
+//Função onde é preparado um objeto ProgDin que realiza a programação dinamica para instruções de código assembly MIPS
 ProgDin MIPS_INSTRUCTIONS()
 {
 	// ProgDin pg = ProgDin();
